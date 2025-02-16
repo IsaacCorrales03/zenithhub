@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if tipo == "profesores" %}
+Profesores - Materia Escolar
+{% elif tipo == "materias" %}
+Materias - Materia Escolar
+{% endif %}
+{% endblock %}
+
+{% block css %}
+<style>
+    .card-hover {
+        transition: all 0.3s ease;
+    }
+
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    .delay-100 {
+        animation-delay: 0.1s;
+    }
+
+    .delay-200 {
+        animation-delay: 0.2s;
+    }
+
+    .delay-300 {
+        animation-delay: 0.3s;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .pulse-animation:hover {
+        animation: pulse 1s infinite;
+    }
+
+    /* Mobile menu animation */
+    .mobile-menu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+    }
+
+    .mobile-menu.active {
+        max-height: 200px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-800 mb-8 text-center capitalize">
+    {{ tipo }}
+</h1>
+{% if tipo == "profesores" %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for profesor in data %}
+    <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover opacity-0 fade-in delay-{{ loop.index0 }}00"
+        onclick="window.location.href='{{ url_for('recursos', tipo='profesor', valor=profesor.nombre) }}'">
+        <div class="p-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+        <div class="p-5">
+            <div class="flex items-center mb-3">
+                <i class="{{ profesor.materia_icono }}"></i>
+                <h2 class="text-xl font-semibold text-gray-800 truncate">{{ profesor.nombre }}</h2>
+            </div>
+            <div class="flex items-center text-sm text-gray-600 mb-4">
+                <i class="fas fa-book mr-2"></i>
+                <span>{{ profesor.materia_nombre }}</span>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <span class="text-xs text-gray-400">{{ profesor.email if profesor.email else "No email" }}</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% elif tipo == "materias" %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for materia in data %}
+    <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover opacity-0 fade-in delay-{{ loop.index0 }}00"
+        onclick="window.location.href='{{ url_for('recursos', tipo='materia', valor=materia.nombre) }}'">
+        <div class="p-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+        <div class="p-5">
+            <div class="flex items-center mb-3">
+                <i class="{{ materia.icono }}"></i>
+                <h2 class="text-xl font-semibold text-gray-800 truncate">{{ materia.nombre }}</h2>
+            </div>
+            {% if materia.descripcion %}
+            <p class="text-gray-600 text-sm mb-4">{{ materia.descripcion }}</p>
+            {% endif %}
+            <div class="mt-4 flex justify-between items-center">
+                {% if materia.profesores == 1 %}
+                <span class="text-xs text-gray-400">{{ materia.profesores }} Profesor</span>
+                {% else %}
+                <span class="text-xs text-gray-400">{{ materia.profesores }} Profesores</span>
+                {% endif %}
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <span class="text-xs text-gray-400">{{ materia.recursos }} Recursos</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% elif tipo == "tareas" %}
+<!-- New tareas content -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for tarea in data %}
+    <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover opacity-0 fade-in delay-{{ loop.index0 }}00">
+        <div class="p-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+        <div class="p-5">
+            <div class="flex items-center mb-3">
+                <i class="{{ tarea.materia_icono }} mr-2 text-indigo-500"></i>
+                <h2 class="text-xl font-semibold text-gray-800 truncate">{{ tarea.titulo }}</h2>
+            </div>
+            <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-user mr-2"></i>
+                <span>{{ tarea.profesor_nombre }}</span>
+            </div>
+            <div class="flex items-center text-sm text-gray-600 mb-4">
+                <i class="fas fa-book mr-2"></i>
+                <span>{{ tarea.materia_nombre }}</span>
+            </div>
+            {% if tarea.descripcion %}
+            <p class="text-gray-600 text-sm mb-4">{{ tarea.descripcion }}</p>
+            {% endif %}
+            <div class="mt-4 flex justify-between items-center">
+                <span class="task-badge {{ 'task-expired' if is_expired else 'task-pending' }}">
+                    {% if is_expired %}
+                    Vencida: {{ tarea.fecha_vencimiento }}
+                    {% else %}
+                    Vence: {{ tarea.fecha_vencimiento }}
+                    {% endif %}
+                </span>
+                <span class="text-xs text-gray-400">Creada: {{ tarea.fecha_creacion }}</span>
+            </div>
+            <div class="flex space-x-2">
+                <a href="{{ url_for('edit_tarea', id=tarea.id) }}" class="text-blue-500 hover:text-blue-700">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{{ url_for('delete_tarea', id=tarea.id) }}"
+                    onclick="return confirm('¿Estás seguro de que deseas eliminar esta tarea?')"
+                    class="text-red-500 hover:text-red-700">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% elif tipo == "recursos" %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for recurso in data %}
+    <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover opacity-0 fade-in delay-{{ loop.index0 }}00">
+        <div class="p-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+        <div class="p-5">
+            <div class="flex items-center mb-3">
+                {% if 'pdf' in recurso.extension %}
+                <i class="fas fa-file-pdf text-red-500 mr-3 text-2xl"></i>
+                {% elif 'doc' in recurso.extension or 'docx' in recurso.extension %}
+                <i class="fas fa-file-word text-blue-500 mr-3 text-2xl"></i>
+                {% elif 'xls' in recurso.extension or 'xlsx' in recurso.extension %}
+                <i class="fas fa-file-excel text-green-500 mr-3 text-2xl"></i>
+                {% elif 'ppt' in recurso.extension or 'pptx' in recurso.extension %}
+                <i class="fas fa-file-powerpoint text-yellow-500 mr-3 text-2xl"></i>
+                {% else %}
+                <i class="fas fa-file-alt text-gray-500 mr-3 text-2xl"></i>
+                {% endif %}
+                <h2 class="text-xl font-semibold text-gray-800 truncate">{{ recurso.title }}</h2>
+            </div>
+            <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-book mr-2"></i>
+                <span>{{ recurso.materia_nombre }}</span>
+            </div>
+            <div class="flex items-center text-sm text-gray-400 mb-2">
+                <i class="fas fa-user mr-2"></i>
+                <span>{{ recurso.autor }}</span>
+            </div>
+            <div class="flex items-center text-sm text-gray-400 mb-4">
+                <i class="far fa-calendar-alt mr-2"></i>
+                <span>{{ recurso.date }}</span>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <a href="{{ recurso.extension }}"
+                    class="flex items-center text-blue-600 hover:text-blue-800 transition duration-300">
+                    <i class="fas fa-download mr-1"></i>
+                    <span>Descargar</span>
+                </a>
+                {% if recurso.size %}
+                <span class="text-xs text-gray-400">{{ recurso.size }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Revelar las tarjetas con efecto de fade
+        const cards = document.querySelectorAll('.fade-in');
+        cards.forEach(card => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+            }, 100);
+        });
+    });
+</script>
+{% endblock %}

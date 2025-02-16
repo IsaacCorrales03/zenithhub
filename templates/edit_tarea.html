@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Tarea{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Editar Tarea</h1>
+            <a href="{{ url_for('tareas') }}" class="text-blue-500 hover:text-blue-700">
+                <i class="fas fa-arrow-left mr-2"></i>Volver a tareas
+            </a>
+        </div>
+
+        <!-- Formulario para editar tarea -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <form action="{{ url_for('edit_tarea', id=tarea.id) }}" method="POST" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="titulo" class="block text-sm font-medium text-gray-700">Título</label>
+                        <input type="text" id="titulo" name="titulo" value="{{ tarea.titulo }}" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                    </div>
+                    
+                    <div>
+                        <label for="fecha_vencimiento" class="block text-sm font-medium text-gray-700">Fecha de vencimiento</label>
+                        <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" value="{{ tarea.fecha_vencimiento }}" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                    </div>
+                    
+                    <div>
+                        <label for="profesor_id" class="block text-sm font-medium text-gray-700">Profesor</label>
+                        <select id="profesor_id" name="profesor_id" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                            <option value="">Selecciona un profesor</option>
+                            {% for profesor in profesores %}
+                            <option value="{{ profesor.id }}" {% if profesor.id == tarea.profesor_id %}selected{% endif %}>
+                                {{ profesor.nombre }} ({{ profesor.materia_nombre }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="materia_id" class="block text-sm font-medium text-gray-700">Materia</label>
+                        <select id="materia_id" name="materia_id" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                            <option value="">Selecciona una materia</option>
+                            {% for materia in materias %}
+                            <option value="{{ materia.id }}" {% if materia.id == tarea.materia_id %}selected{% endif %}>
+                                {{ materia.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" rows="4"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">{{ tarea.descripcion }}</textarea>
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <a href="{{ url_for('tareas') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <!-- Aquí puedes agregar scripts adicionales si es necesario -->
+{% endblock %}
