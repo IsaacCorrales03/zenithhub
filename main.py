@@ -13,6 +13,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.enums import TA_CENTER
 from dotenv import load_dotenv
 
+
 # Configuración inicial de Flask
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -24,6 +25,10 @@ load_dotenv()
 GOOGLE_CREDENTIALS_FILE = "credentials.json"
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 FOLDER_ID = "1Q4M8tpF2MkOvjjBQBWUJiEzh2kXJ7w47"
+
+@app.before_request
+def logger():
+    print(f"Request Method: {request.method} | Request URL: {request.url}")
 
 def get_db_connection():
     try:
@@ -615,5 +620,23 @@ def recursos(tipo):
 def download(filename):
     return redirect(filename)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8090, debug=True)
+
+import threading
+import time
+import requests
+def peticion_periodica():
+    while True:
+        # Llamar a la función que deseas ejecutar
+        requests.get("https://zenithhub.onrender.com")
+        time.sleep(3)
+
+# Iniciar el subproceso
+def iniciar_subproceso():
+    t = threading.Thread(target=peticion_periodica)
+    t.daemon = True  # Asegura que el hilo termine cuando el programa termine
+    t.start()
+
+
+# iniciar subproceso
+iniciar_subproceso()
+app.run(host='0.0.0.0', port=8090, debug=True)
