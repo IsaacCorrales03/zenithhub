@@ -28,6 +28,7 @@ FOLDER_ID = "1Q4M8tpF2MkOvjjBQBWUJiEzh2kXJ7w47"
 
 @app.before_request
 def logger():
+    iniciar_subproceso(bot)
     print(f"Request Method: {request.method} | Request URL: {request.url}")
 
 def get_db_connection():
@@ -630,13 +631,16 @@ def peticion_periodica():
         requests.get("https://zenithhub.onrender.com")
         time.sleep(30)
 
+bot = False
 # Iniciar el subproceso
-def iniciar_subproceso():
-    t = threading.Thread(target=peticion_periodica)
-    t.daemon = True  # Asegura que el hilo termine cuando el programa termine
-    t.start()
+def iniciar_subproceso(bot):
+    if not bot:
+        t = threading.Thread(target=peticion_periodica)
+        t.daemon = True  # Asegura que el hilo termine cuando el programa termine
+        t.start()
+        bot = True
 
 
-# iniciar subproceso
-iniciar_subproceso()
-app.run(host='0.0.0.0', port=8090, debug=True)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8090)
