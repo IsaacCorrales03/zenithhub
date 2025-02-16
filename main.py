@@ -628,7 +628,7 @@ def peticion_periodica():
     while True:
         # Llamar a la función que deseas ejecutar
         requests.get("https://zenithhub.onrender.com")
-        time.sleep(3)
+        time.sleep(30)
 
 # Iniciar el subproceso
 def iniciar_subproceso():
