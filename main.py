@@ -28,7 +28,7 @@ FOLDER_ID = "1Q4M8tpF2MkOvjjBQBWUJiEzh2kXJ7w47"
 
 @app.before_request
 def logger():
-    iniciar_subproceso(bot)
+    iniciar_subproceso()
     print(f"Request Method: {request.method} | Request URL: {request.url}")
 
 def get_db_connection():
@@ -633,7 +633,8 @@ def peticion_periodica():
 
 bot = False
 # Iniciar el subproceso
-def iniciar_subproceso(bot):
+def iniciar_subproceso():
+    global bot
     if not bot:
         t = threading.Thread(target=peticion_periodica)
         t.daemon = True  # Asegura que el hilo termine cuando el programa termine
