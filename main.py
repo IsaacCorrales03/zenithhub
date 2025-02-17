@@ -516,6 +516,8 @@ def upload():
         profesor = request.form['profesor']
         text = request.form['text']
         file = request.files.get('file')
+        if not os.path.exists(app.config['UPLOAD_FOLDER']):
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         try:
             cursor.execute('SELECT id FROM materias WHERE nombre = %s', (materia,))
             if not (materia := cursor.fetchone()):
