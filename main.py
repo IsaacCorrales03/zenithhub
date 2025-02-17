@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from werkzeug.utils import secure_filename
 import mysql.connector
 from mysql.connector import Error
+import io
 import os
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
@@ -13,7 +15,6 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.enums import TA_CENTER
 from dotenv import load_dotenv
 
-
 # Configuración inicial de Flask
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -25,6 +26,7 @@ load_dotenv()
 GOOGLE_CREDENTIALS_FILE = "credentials.json"
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 FOLDER_ID = "1Q4M8tpF2MkOvjjBQBWUJiEzh2kXJ7w47"
+UPLOAD_FOLDER = 'static/uploads'
 
 @app.before_request
 def logger():
@@ -48,6 +50,7 @@ def get_db_connection():
         return None
 
 def text_to_pdf(text, filename):
+    filepath = os.path.join('static/uploads', filename)
     pdf = SimpleDocTemplate(
         filename,
         pagesize=letter,
@@ -61,26 +64,45 @@ def text_to_pdf(text, filename):
 
     lines = text.split('\n')
     for line in lines:
+        line = line.strip()
+        if not line:  # Skip empty lines
+            continue
+            
         if line.startswith("##"):
             story.append(Paragraph(line[2:].strip(), styles['Title']))
         elif line.startswith("*"):
-            story.append(Paragraph(f"<b>{line[1:].strip()}</b>", styles['BodyText']))
+            # Corrección para texto en negrita
+            content = line[1:].strip()
+            story.append(Paragraph(f"<para><b>{content}</b></para>", styles['BodyText']))
         elif line.startswith("_"):
-            story.append(Paragraph(f"<i>{line[1:].strip()}</i>", styles['BodyText']))
+            # Corrección para texto en cursiva
+            content = line[1:].strip()
+            story.append(Paragraph(f"<para><i>{content}</i></para>", styles['BodyText']))
         elif line.startswith("<u>"):
-            story.append(Paragraph(f"<u>{line[3:].strip()}</u>", styles['BodyText']))
-        elif line.startswith("{") and line.endswith("}"):
-            color, content = line[1:-1].split('}')
-            story.append(Paragraph(f'<font color="{color}">{content}</font>', styles['BodyText']))
+            # Corrección para texto subrayado
+            content = line[3:-4].strip()  # Removemos <u> y </u>
+            story.append(Paragraph(f"<para><u>{content}</u></para>", styles['BodyText']))
+        elif "{" in line and "}" in line:
+            # Corrección para texto con color
+            try:
+                parts = line.split("}")
+                color = parts[0][1:]  # Removemos el { inicial
+                content = parts[1].split("{")[0]  # Obtenemos el contenido entre las llaves
+                story.append(Paragraph(f"<para><font color='{color}'>{content}</font></para>", styles['BodyText']))
+            except IndexError:
+                # Si hay un error en el formato, lo tratamos como texto normal
+                story.append(Paragraph(line, styles['BodyText']))
         elif line.startswith("- "):
-            story.append(Paragraph(f"• {line[2:].strip()}", styles['BodyText']))
+            story.append(Paragraph(f"<para>• {line[2:].strip()}</para>", styles['BodyText']))
         elif line[0].isdigit() and line[1] == '.':
-            story.append(Paragraph(f"{line}", styles['BodyText']))
+            story.append(Paragraph(f"<para>{line}</para>", styles['BodyText']))
         else:
-            story.append(Paragraph(line, styles['BodyText']))
+            story.append(Paragraph(f"<para>{line}</para>", styles['BodyText']))
+        
         story.append(Spacer(1, 12))
 
     pdf.build(story)
+    return filepath
 
 @app.route('/')
 def index():
@@ -459,10 +481,26 @@ def get_drive_service():
     creds = Credentials.from_service_account_file(GOOGLE_CREDENTIALS_FILE, scopes=SCOPES)
     return build("drive", "v3", credentials=creds)
 
-def upload_to_drive(file):
+def upload_to_drive(file, filename=None, content_type=None):
+    """
+    Sube un archivo a Google Drive
+    
+    Args:
+        file: Puede ser FileStorage o BufferedReader
+        filename: Nombre del archivo (opcional, requerido si file es BufferedReader)
+        content_type: Tipo de contenido (opcional, requerido si file es BufferedReader)
+    """
     drive_service = get_drive_service()
-    file_metadata = {"name": file.filename, "parents": [FOLDER_ID]}
-    media = MediaIoBaseUpload(file, mimetype=file.content_type, resumable=True)
+    
+    # Si es un archivo abierto (BufferedReader), usar los parámetros proporcionados
+    if isinstance(file, io.BufferedReader):
+        file_metadata = {"name": filename, "parents": [FOLDER_ID]}
+        media = MediaIoBaseUpload(file, mimetype=content_type or 'application/octet-stream', resumable=True)
+    else:
+        # Si es FileStorage, usar sus atributos
+        file_metadata = {"name": file.filename, "parents": [FOLDER_ID]}
+        media = MediaIoBaseUpload(file, mimetype=file.content_type, resumable=True)
+    
     file_drive = drive_service.files().create(body=file_metadata, media_body=media, fields="id").execute()
     return f"https://drive.google.com/uc?id={file_drive.get('id')}"
 
@@ -471,44 +509,57 @@ def upload():
     if request.method == 'POST':
         conn = get_db_connection()
         cursor = conn.cursor()
-
+        print(request.form)
+        titulo = request.form['title']
+        autor = request.form['autor']
+        materia = request.form['subject']
+        profesor = request.form['profesor']
+        text = request.form['text']
+        file = request.files.get('file')
         try:
-            # Validar materia
-            cursor.execute('SELECT id FROM materias WHERE nombre = %s', (request.form['subject'],))
+            cursor.execute('SELECT id FROM materias WHERE nombre = %s', (materia,))
             if not (materia := cursor.fetchone()):
-                return "Materia no encontrada.", 404
-
-            # Subir archivo
-            if file := request.files.get('file'):
-                file_url = upload_to_drive(file)
-                extension = file.filename.split('.')[-1].lower()
-            elif text := request.form.get('text'):
-                filename = f"{request.form['title'].replace(' ', '_')}.txt"
-                with open(filename, 'w') as f:
-                    f.write(text)
-                with open(filename, 'rb') as f:
+                return "Materia no encontrada", 404
+            # Procesar archivo o texto
+            if file:
+                # Si es un archivo, guardarlo localmente primero
+                filename = secure_filename(file.filename)
+                local_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(local_path)
+                
+                # Luego subirlo a Drive
+                with open(local_path, 'rb') as f:
+                    file_url = upload_to_drive(f, filename)
+                
+                extension = filename.split('.')[-1].lower()
+            elif text:
+                # Si es texto, convertirlo a PDF y guardarlo localmente
+                filename = secure_filename(f"{titulo}.pdf")
+                local_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                text_to_pdf(text, local_path)
+                
+                # Luego subirlo a Drive
+                with open(local_path, 'rb') as f:
                     file_url = upload_to_drive(f)
-                os.remove(filename)
-                extension = 'txt'
+                
+                extension = 'pdf'
             else:
                 return "No se proporcionó contenido", 400
-
-            # Insertar en base de datos
             cursor.execute('''
-                INSERT INTO files (title, materia_id, date, filename, autor, profesor_id, extension)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO files (title, materia_id, date, filename, file_url, autor, profesor_id, extension)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
-                request.form['title'],
+                titulo,
                 materia[0],
                 datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                filename,
                 file_url,
-                request.form['autor'],
-                request.form['profesor'],
+                autor,
+                profesor,
                 extension
             ))
             conn.commit()
             return redirect(url_for('index'))
-        
         finally:
             conn.close()
 
@@ -619,7 +670,7 @@ def recursos(tipo):
 
 @app.route('/download/<filename>')
 def download(filename):
-    return redirect(filename)
+    return send_from_directory(UPLOAD_FOLDER,filename)
 
 
 import threading
@@ -636,12 +687,13 @@ bot = False
 def iniciar_subproceso():
     global bot
     if not bot:
+        bot = True
         t = threading.Thread(target=peticion_periodica)
         t.daemon = True  # Asegura que el hilo termine cuando el programa termine
         t.start()
-        bot = True
+
 
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8090)
+    app.run(host='0.0.0.0', port=8090, debug=True)
