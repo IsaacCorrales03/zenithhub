@@ -109,6 +109,9 @@ def index():
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # Get current datetime for comparison
+    now = datetime.now()
+
     # Obtener tareas
     query_tareas = '''
     SELECT 
@@ -127,21 +130,26 @@ def index():
     LIMIT 3
     '''
     cursor.execute(query_tareas)
-    tareas = cursor.fetchall()
+    tareas_raw = cursor.fetchall()
     
-    tareas_formateadas = []
-    for tarea in tareas:
+    # Convert the raw tuples to dictionaries and process dates
+    tareas = []
+    for tarea in tareas_raw:
+        # Convert the date string to datetime object
+        fecha_vencimiento = datetime.strptime(str(tarea[3]), '%Y-%m-%d %H:%M:%S') if tarea[3] else None
+        fecha_creacion = datetime.strptime(str(tarea[4]), '%Y-%m-%d %H:%M:%S') if tarea[4] else None
+        
         tarea_dict = {
             'id': tarea[0],
             'titulo': tarea[1],
             'descripcion': tarea[2],
-            'fecha_vencimiento': tarea[3].strftime('%Y-%m-%d') if isinstance(tarea[3], datetime) else tarea[3],
-            'fecha_creacion': tarea[4].strftime('%Y-%m-%d %H:%M:%S'),
+            'fecha_vencimiento': fecha_vencimiento,
+            'fecha_creacion': fecha_creacion,
             'profesor_nombre': tarea[5],
             'materia_nombre': tarea[6],
             'materia_icono': tarea[7]
         }
-        tareas_formateadas.append(tarea_dict)
+        tareas.append(tarea_dict)
 
     # Obtener archivos
     query_archivos = '''
@@ -181,7 +189,7 @@ def index():
 
     conn.close()
     return render_template('index.html', 
-                         tareas=tareas_formateadas,
+                         tareas=tareas,
                          archivos=archivos_formateados,
                          now=datetime.now())
 

@@ -105,16 +105,21 @@
                             <span>Materia: {{ tarea.materia_nombre }}</span>
                         </div>
                         
-                        <!-- Fecha de vencimiento -->
                         <div class="flex items-center justify-center text-sm text-gray-600 mb-2">
                             <i class="fas fa-calendar-alt mr-2"></i>
-                            <span class="task-badge {{ 'task-expired' if tarea.fecha_vencimiento < now else 'task-pending' }}">
-                                {% if tarea.fecha_vencimiento < now %}
-                                    Vencida: {{ tarea.fecha_vencimiento.strftime('%Y-%m-%d') }}
-                                {% else %}
-                                    Vence: {{ tarea.fecha_vencimiento.strftime('%Y-%m-%d') }}
-                                {% endif %}
-                            </span>
+                            {% if tarea.fecha_vencimiento %}
+                                <span class="task-badge {{ 'task-expired' if tarea.fecha_vencimiento < now else 'task-pending' }}">
+                                    {% if tarea.fecha_vencimiento < now %}
+                                        Vencida: {{ tarea.fecha_vencimiento.strftime('%Y-%m-%d') }}
+                                    {% else %}
+                                        Vence: {{ tarea.fecha_vencimiento.strftime('%Y-%m-%d') }}
+                                    {% endif %}
+                                </span>
+                            {% else %}
+                                <span class="task-badge task-pending">
+                                    Sin fecha de vencimiento
+                                </span>
+                            {% endif %}
                         </div>
                         
                         <!-- Fecha de creación -->
