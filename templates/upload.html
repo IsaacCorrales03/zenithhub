@@ -3,219 +3,339 @@
 {% block title %}Subir Archivo{% endblock %}
 
 {% block css %}
-    <style>
-        .card-hover {
-            transition: all 0.3s ease;
+<style>
+    .card-hover {
+        transition: all 0.3s ease;
+    }
+
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
         }
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
         }
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    .editor-toolbar button {
+        transition: all 0.2s ease;
+    }
+
+    .editor-toolbar button:hover {
+        background-color: #e5e7eb;
+    }
+
+    .editor-preview {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 0.5rem;
+        min-height: 100px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .editor-preview h2 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .editor-preview strong {
+        font-weight: bold;
+    }
+
+    .file-upload-container {
+        border: 2px dashed #cbd5e0;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .file-upload-container:hover {
+        border-color: #4299e1;
+    }
+
+    .pulse-animation:hover {
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
         }
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+
+        50% {
+            transform: scale(1.05);
         }
-        .editor-toolbar button {
-            transition: all 0.2s ease;
-        }
-        .editor-toolbar button:hover {
-            background-color: #e5e7eb;
-        }
-        .editor-preview {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-top: 0.5rem;
-            min-height: 100px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .editor-preview h2 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .editor-preview strong {
-            font-weight: bold;
-        }
-        .file-upload-container {
-            border: 2px dashed #cbd5e0;
-            border-radius: 0.5rem;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .file-upload-container:hover {
-            border-color: #4299e1;
-        }
-        .pulse-animation:hover {
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-    </style>
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-    <div class="container mx-auto p-6">
-        <header class="mb-8 text-center animate__animated animate__fadeInDown">
-            <h1 class="text-4xl font-extrabold text-gray-800 mb-2">Subir Nuevo Archivo</h1>
-            <p class="text-gray-600 max-w-2xl mx-auto">Comparte materiales educativos con tus compañeros y profesores.</p>
-        </header>
+<div class="container mx-auto p-6">
+    <header class="mb-8 text-center animate__animated animate__fadeInDown">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-2">Subir Nuevo Archivo</h1>
+        <p class="text-gray-600 max-w-2xl mx-auto">Comparte materiales educativos con tus compañeros y profesores.</p>
+    </header>
 
-        <div class="max-w-3xl mx-auto opacity-0 fade-in" style="animation-delay: 0.2s;">
-            <form method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
-                <div class="p-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
-                <div class="p-6">
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-medium mb-2">Título del Material</label>
-                        <input type="text" name="title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" required placeholder="Ej: Resumen de la Segunda Guerra Mundial">
+    <div class="max-w-3xl mx-auto opacity-0 fade-in" style="animation-delay: 0.2s;">
+        <form method="POST" enctype="multipart/form-data"
+            class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
+            <div class="p-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+            <div class="p-6">
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Título del Material</label>
+                    <input type="text" name="title"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        required placeholder="Ej: Resumen de la Segunda Guerra Mundial">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Autor</label>
+                    <input type="text" name="autor"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        required placeholder="Ej: Isaac">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Materia</label>
+                    <div class="relative">
+                        <select name="subject"
+                            class="appearance-none w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pr-8"
+                            required>
+                            <option value="" disabled selected>Selecciona una materia</option>
+                            {% for materia in materias %}
+                            <option value="{{ materia.nombre }}">{{ materia.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
                     </div>
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-medium mb-2">Autor</label>
-                        <input type="text" name="autor" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" required placeholder="Ej: Isaac">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Profesor</label>
+                    <div class="relative">
+                        <select name="profesor"
+                            class="appearance-none w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pr-8"
+                            required>
+                            <option value="" disabled selected>Selecciona un profesor</option>
+                            {% for profe in profesores %}
+                            <option value="{{ profe.id }}">{{ profe.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
                     </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-medium mb-2">Materia</label>
-                        <div class="relative">
-                            <select name="subject" class="appearance-none w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pr-8" required>
-                                <option value="" disabled selected>Selecciona una materia</option>
-                                {% for materia in materias %}
-                                <option value="{{ materia.nombre }}">{{ materia.nombre }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <i class="fas fa-chevron-down"></i>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Subir Archivo</label>
+                    <div class="file-upload-container" id="dropArea">
+                        <input type="file" name="file" id="fileInput" class="hidden">
+                        <div class="text-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                            <p class="text-gray-500 mb-2">Arrastra y suelta tu archivo aquí o</p>
+                            <button type="button" id="browseButton"
+                                class="text-blue-500 font-medium hover:text-blue-700 transition duration-300">Buscar en
+                                tu dispositivo</button>
+                        </div>
+                        <div id="filePreview" class="hidden mt-4">
+                            <div class="flex items-center p-2 bg-blue-50 rounded-lg">
+                                <i id="fileIcon" class="fas fa-file text-blue-500 mr-3 text-xl"></i>
+                                <span id="fileName" class="text-sm text-gray-700 flex-grow truncate mr-2"></span>
+                                <button type="button" id="removeFile" class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-medium mb-2">Profesor</label>
-                        <div class="relative">
-                            <select name="profesor" class="appearance-none w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pr-8" required>
-                                <option value="" disabled selected>Selecciona un profesor</option>
-                                {% for profe in profesores %}
-                                <option value="{{ profe.id }}">{{ profe.nombre }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <i class="fas fa-chevron-down"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-medium mb-2">Subir Archivo</label>
-                        <div class="file-upload-container" id="dropArea">
-                            <input type="file" name="file" id="fileInput" class="hidden">
-                            <div class="text-center">
-                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
-                                <p class="text-gray-500 mb-2">Arrastra y suelta tu archivo aquí o</p>
-                                <button type="button" id="browseButton" class="text-blue-500 font-medium hover:text-blue-700 transition duration-300">Buscar en tu dispositivo</button>
-                            </div>
-                            <div id="filePreview" class="hidden mt-4">
-                                <div class="flex items-center p-2 bg-blue-50 rounded-lg">
-                                    <i id="fileIcon" class="fas fa-file text-blue-500 mr-3 text-xl"></i>
-                                    <span id="fileName" class="text-sm text-gray-700 flex-grow truncate mr-2"></span>
-                                    <button type="button" id="removeFile" class="text-red-500 hover:text-red-700">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-medium mb-2">Editor de Texto</label>
-                        <div class="editor-toolbar flex flex-wrap gap-2 mb-2 p-2 bg-gray-50 rounded-lg">
-                            <!-- Botones de formato -->
-                            <button type="button" data-action="title" class="p-1 rounded hover:bg-gray-200" title="Título">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Editor de Texto</label>
+                    <div class="editor-toolbar flex flex-wrap gap-2 mb-2 p-2 bg-gray-50 rounded-lg">
+                        <!-- Botones de formato de texto -->
+                        <div class="flex gap-2 border-r pr-2">
+                            <button type="button" data-action="title" class="p-1 rounded hover:bg-gray-200"
+                                title="Título">
                                 <i class="fas fa-heading"></i>
                             </button>
-                            <button type="button" data-action="bold" class="p-1 rounded hover:bg-gray-200" title="Negrita">
+                            <button type="button" data-action="subtitle" class="p-1 rounded hover:bg-gray-200"
+                                title="Subtítulo">
+                                <i class="fas fa-heading text-sm"></i>
+                            </button>
+                        </div>
+
+                        <!-- Botones de estilo -->
+                        <div class="flex gap-2 border-r pr-2">
+                            <button type="button" data-action="bold" class="p-1 rounded hover:bg-gray-200"
+                                title="Negrita">
                                 <i class="fas fa-bold"></i>
                             </button>
-                            <button type="button" data-action="italic" class="p-1 rounded hover:bg-gray-200" title="Cursiva">
+                            <button type="button" data-action="italic" class="p-1 rounded hover:bg-gray-200"
+                                title="Cursiva">
                                 <i class="fas fa-italic"></i>
                             </button>
-                            <button type="button" data-action="underline" class="p-1 rounded hover:bg-gray-200" title="Subrayado">
+                            <button type="button" data-action="underline" class="p-1 rounded hover:bg-gray-200"
+                                title="Subrayado">
                                 <i class="fas fa-underline"></i>
                             </button>
-                            <button type="button" data-action="list-ul" class="p-1 rounded hover:bg-gray-200" title="Lista desordenada">
+                        </div>
+
+                        <!-- Botones de listas -->
+                        <div class="flex gap-2 border-r pr-2">
+                            <button type="button" data-action="list-ul" class="p-1 rounded hover:bg-gray-200"
+                                title="Lista desordenada">
                                 <i class="fas fa-list-ul"></i>
                             </button>
-                            <button type="button" data-action="list-ol" class="p-1 rounded hover:bg-gray-200" title="Lista ordenada">
+                            <button type="button" data-action="list-ol" class="p-1 rounded hover:bg-gray-200"
+                                title="Lista ordenada">
                                 <i class="fas fa-list-ol"></i>
                             </button>
-                            <div class="relative color-dropdown">
-                                <button type="button" data-action="color" class="p-1 rounded flex items-center hover:bg-gray-200 color-dropdown-toggle" title="Color de texto">
-                                    <i class="fas fa-palette"></i>
-                                    <i class="fas fa-chevron-down text-xs ml-1"></i>
-                                </button>
-                                <div class="absolute hidden bg-white shadow-lg rounded-lg p-2 z-10 mt-1 grid grid-cols-4 gap-1 w-32 color-dropdown-menu">
-                                    <button type="button" data-color="red" class="w-6 h-6 rounded-full bg-red-500" title="Rojo"></button>
-                                    <button type="button" data-color="blue" class="w-6 h-6 rounded-full bg-blue-500" title="Azul"></button>
-                                    <button type="button" data-color="green" class="w-6 h-6 rounded-full bg-green-500" title="Verde"></button>
-                                    <button type="button" data-color="purple" class="w-6 h-6 rounded-full bg-purple-500" title="Púrpura"></button>
-                                    <button type="button" data-color="yellow" class="w-6 h-6 rounded-full bg-yellow-500" title="Amarillo"></button>
-                                    <button type="button" data-color="pink" class="w-6 h-6 rounded-full bg-pink-500" title="Rosa"></button>
-                                    <button type="button" data-color="indigo" class="w-6 h-6 rounded-full bg-indigo-500" title="Índigo"></button>
-                                    <button type="button" data-color="gray" class="w-6 h-6 rounded-full bg-gray-500" title="Gris"></button>
+                        </div>
+
+                        <!-- Botón de tabla -->
+                        <div class="relative table-dropdown">
+                            <button type="button"
+                                class="p-1 rounded flex items-center hover:bg-gray-200 table-dropdown-toggle"
+                                title="Insertar tabla">
+                                <i class="fas fa-table"></i>
+                                <i class="fas fa-chevron-down text-xs ml-1"></i>
+                            </button>
+                            <div
+                                class="absolute hidden bg-white shadow-lg rounded-lg p-4 z-10 mt-1 w-64 table-dropdown-menu">
+                                <div class="mb-2">
+                                    <label class="block text-sm text-gray-700 mb-1">Columnas (max. 4)</label>
+                                    <input type="number" min="1" max="4" value="2"
+                                        class="table-cols w-20 px-2 py-1 border rounded">
                                 </div>
+                                <div class="mb-3">
+                                    <label class="block text-sm text-gray-700 mb-1">Filas</label>
+                                    <input type="number" min="1" max="10" value="2"
+                                        class="table-rows w-20 px-2 py-1 border rounded">
+                                </div>
+                                <button type="button"
+                                    class="insert-table-btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
+                                    Insertar tabla
+                                </button>
                             </div>
                         </div>
-                        <textarea name="text" id="editor" rows="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" placeholder="Escribe tu texto aquí..."></textarea>
-                        <div class="flex justify-between items-center mt-2">
-                            <button type="button" id="previewButton" class="text-blue-500 hover:text-blue-700 transition duration-300">
-                                <i class="far fa-eye mr-1"></i> Vista previa
+
+                        <!-- Selector de color -->
+                        <div class="relative color-dropdown">
+                            <button type="button" data-action="color"
+                                class="p-1 rounded flex items-center hover:bg-gray-200 color-dropdown-toggle"
+                                title="Color de texto">
+                                <i class="fas fa-palette"></i>
+                                <i class="fas fa-chevron-down text-xs ml-1"></i>
                             </button>
+                            <div
+                                class="absolute hidden bg-white shadow-lg rounded-lg p-2 z-10 mt-1 grid grid-cols-4 gap-1 w-32 color-dropdown-menu">
+                                <button type="button" data-color="red" class="w-6 h-6 rounded-full bg-red-500"
+                                    title="Rojo"></button>
+                                <button type="button" data-color="blue" class="w-6 h-6 rounded-full bg-blue-500"
+                                    title="Azul"></button>
+                                <button type="button" data-color="green" class="w-6 h-6 rounded-full bg-green-500"
+                                    title="Verde"></button>
+                                <button type="button" data-color="purple" class="w-6 h-6 rounded-full bg-purple-500"
+                                    title="Púrpura"></button>
+                                <button type="button" data-color="yellow" class="w-6 h-6 rounded-full bg-yellow-500"
+                                    title="Amarillo"></button>
+                                <button type="button" data-color="pink" class="w-6 h-6 rounded-full bg-pink-500"
+                                    title="Rosa"></button>
+                                <button type="button" data-color="indigo" class="w-6 h-6 rounded-full bg-indigo-500"
+                                    title="Índigo"></button>
+                                <button type="button" data-color="gray" class="w-6 h-6 rounded-full bg-gray-500"
+                                    title="Gris"></button>
+                            </div>
                         </div>
-                        <div id="editorPreview" class="editor-preview mt-4 p-4 border border-gray-200 rounded-lg"></div>
-                        
+
+                        <!-- Botón de ayuda -->
+                        <button type="button" class="help-btn p-1 rounded hover:bg-gray-200 ml-auto" title="Ayuda">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
                     </div>
-                    
-                    <script>
-                    document.addEventListener('DOMContentLoaded', function() {
+                    <textarea name="text" id="editor" rows="8"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        placeholder="Escribe tu texto aquí..."></textarea>
+                    <div class="flex justify-between items-center mt-2">
+                        <button type="button" id="previewButton"
+                            class="text-blue-500 hover:text-blue-700 transition duration-300">
+                            <i class="far fa-eye mr-1"></i> Vista previa
+                        </button>
+                        <button type="button" id="clearButton"
+                            class="text-red-500 hover:text-red-700 transition duration-300">
+                            <i class="fas fa-trash-alt mr-1"></i> Limpiar
+                        </button>
+                    </div>
+                    <div id="editorPreview" class="editor-preview mt-4 p-4 border border-gray-200 rounded-lg"></div>
+                </div>
+
+
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
                         const editor = document.getElementById('editor');
                         const editorPreview = document.getElementById('editorPreview');
                         const previewButton = document.getElementById('previewButton');
+                        const clearButton = document.getElementById('clearButton');
                         const toolbarButtons = document.querySelectorAll('.editor-toolbar button[data-action]');
                         const colorButtons = document.querySelectorAll('button[data-color]');
                         const colorDropdownToggle = document.querySelector('.color-dropdown-toggle');
                         const colorDropdownMenu = document.querySelector('.color-dropdown-menu');
-                    
-                        // Manejo del dropdown de colores
-                        colorDropdownToggle.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            colorDropdownMenu.classList.toggle('hidden');
-                        });
-                    
-                        // Cerrar el dropdown cuando se hace clic fuera de él
-                        document.addEventListener('click', (e) => {
-                            if (!e.target.closest('.color-dropdown')) {
-                                colorDropdownMenu.classList.add('hidden');
-                            }
-                        });
-                    
-                        // Evitar que el dropdown se cierre al hacer clic en los botones de color
-                        colorDropdownMenu.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                        });
-                    
+                        const tableDropdownToggle = document.querySelector('.table-dropdown-toggle');
+                        const tableDropdownMenu = document.querySelector('.table-dropdown-menu');
+                        const insertTableBtn = document.querySelector('.insert-table-btn');
+                        const helpBtn = document.querySelector('.help-btn');
+
+                        // Manejo de dropdowns
+                        function handleDropdown(toggle, menu) {
+                            toggle.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                menu.classList.toggle('hidden');
+                            });
+
+                            document.addEventListener('click', () => {
+                                menu.classList.add('hidden');
+                            });
+
+                            menu.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                            });
+                        }
+
+                        handleDropdown(colorDropdownToggle, colorDropdownMenu);
+                        handleDropdown(tableDropdownToggle, tableDropdownMenu);
+
                         // Funcionalidad de los botones de formato
                         toolbarButtons.forEach(button => {
                             button.addEventListener('click', () => {
                                 const action = button.getAttribute('data-action');
-                                if (action !== 'color') { // Ignorar el botón de color principal
+                                if (action !== 'color') {
                                     switch (action) {
                                         case 'title':
-                                            insertTextAtCursor('##', '');
+                                            insertTextAtCursor('# ', '\n');
+                                            break;
+                                        case 'subtitle':
+                                            insertTextAtCursor('## ', '\n');
                                             break;
                                         case 'bold':
                                             insertTextAtCursor('*', '*');
@@ -227,37 +347,63 @@
                                             insertTextAtCursor('<u>', '</u>');
                                             break;
                                         case 'list-ul':
-                                            insertTextAtCursor('- ', '');
+                                            insertTextAtCursor('- ', '\n');
                                             break;
                                         case 'list-ol':
-                                            insertTextAtCursor('1. ', '');
+                                            insertTextAtCursor('1. ', '\n');
                                             break;
                                     }
                                 }
                             });
                         });
-                    
+
+                        // Funcionalidad de insertar tabla 
+                        insertTableBtn.addEventListener('click', () => {
+                            const cols = Math.min(parseInt(document.querySelector('.table-cols').value), 4);
+                            const rows = parseInt(document.querySelector('.table-rows').value);
+
+                            let tableMarkdown = '\n|';
+                            // Encabezados
+                            for (let i = 0; i < cols; i++) {
+                                tableMarkdown += ` Columna ${i + 1} |`;
+                            }
+                            // Separador
+                            tableMarkdown += '\n|';
+                            for (let i = 0; i < cols; i++) {
+                                tableMarkdown += ' --- |';
+                            }
+                            // Filas
+                            for (let i = 0; i < rows; i++) {
+                                tableMarkdown += '\n|';
+                                for (let j = 0; j < cols; j++) {
+                                    tableMarkdown += '   |';
+                                }
+                            }
+                            tableMarkdown += '\n\n';
+
+                            insertTextAtCursor(tableMarkdown, '');
+                            tableDropdownMenu.classList.add('hidden');
+                        });
+
                         // Funcionalidad de los botones de color
                         colorButtons.forEach(button => {
                             button.addEventListener('click', () => {
                                 const color = button.getAttribute('data-color');
                                 insertTextAtCursor(`{${color}}`, '{/color}');
-                                // Cerrar el dropdown después de seleccionar un color
                                 colorDropdownMenu.classList.add('hidden');
                             });
                         });
-                    
-                        // Insertar texto en la posición del cursor
+
+                        // Función para insertar texto en la posición del cursor
                         function insertTextAtCursor(before, after) {
                             const startPos = editor.selectionStart;
                             const endPos = editor.selectionEnd;
                             const selectedText = editor.value.substring(startPos, endPos);
                             const newText = before + selectedText + after;
-                    
+
                             editor.value = editor.value.substring(0, startPos) + newText + editor.value.substring(endPos);
                             editor.focus();
-                    
-                            // Colocar el cursor entre los tags si no hay texto seleccionado
+
                             if (startPos === endPos) {
                                 editor.selectionStart = startPos + before.length;
                                 editor.selectionEnd = startPos + before.length;
@@ -266,160 +412,252 @@
                                 editor.selectionEnd = startPos + newText.length;
                             }
                         }
-                    
-                        // Manejar la tecla Enter para insertar un salto de línea
-                        editor.addEventListener('keydown', (e) => {
-                            if (e.key === 'Enter') {
-                                e.preventDefault(); // Evitar el comportamiento por defecto (como enviar un formulario)
-                                insertTextAtCursor('\n', ''); // Insertar un salto de línea
-                            }
-                        });
-                    
+
                         // Función para generar la vista previa
                         function generatePreview() {
                             let previewContent = editor.value
-                                .replace(/##(.+?)($|\n)/g, '<h2 class="text-xl font-bold mb-2">$1</h2>') // Títulos
+                                .replace(/^#\s(.+?)$/gm, '<h1 class="text-2xl font-bold mb-3">$1</h1>') // Títulos
+                                .replace(/^##\s(.+?)$/gm, '<h2 class="text-xl font-semibold mb-1">$1</h2>') // Subtítulos
                                 .replace(/\*(.+?)\*/g, '<strong>$1</strong>') // Negrita
                                 .replace(/_(.+?)_/g, '<em>$1</em>') // Cursiva
                                 .replace(/<u>(.+?)<\/u>/g, '<u>$1</u>') // Subrayado
                                 .replace(/{([a-z]+)}([\s\S]*?){\/color}/g, '<span style="color: $1">$2</span>') // Colores
-                                .replace(/\n/g, '<br>'); // Convertir saltos de línea en <br>
-                    
+                                .replace(/\n/g, '<br>'); // Saltos de línea
+
+                            // Procesar tablas
+                            const tableRegex = /\|(.+)\n\|([-\s|]+)\n((?:\|.+\n)+)/g;
+                            previewContent = previewContent.replace(tableRegex, (match, header, separator, rows) => {
+                                const headers = header.split('|').filter(cell => cell.trim());
+                                const tableRows = rows.split('\n').filter(row => row.trim());
+
+                                let tableHTML = '<table class="min-w-full border-collapse border border-gray-300 mb-4"><thead><tr>';
+
+                                // Encabezados
+                                headers.forEach(header => {
+                                    tableHTML += `<th class="border border-gray-300 px-4 py-2 bg-gray-100">${header.trim()}</th>`;
+                                });
+
+                                tableHTML += '</tr></thead><tbody>';
+
+                                // Filas
+                                tableRows.forEach(row => {
+                                    const cells = row.split('|').filter(cell => cell.trim());
+                                    tableHTML += '<tr>';
+                                    cells.forEach(cell => {
+                                        tableHTML += `<td class="border border-gray-300 px-4 py-2">${cell.trim()}</td>`;
+                                    });
+                                    tableHTML += '</tr>';
+                                });
+
+                                tableHTML += '</tbody></table>';
+                                return tableHTML;
+                            });
+
                             // Procesar listas
-                            const ulMatches = previewContent.match(/-\s(.+?)(\n|$)/g);
+                            const ulMatches = previewContent.match(/-\s(.+?)(<br>|$)/g);
                             if (ulMatches) {
                                 let ulContent = '<ul class="list-disc pl-5 mb-4">';
                                 ulMatches.forEach(match => {
-                                    const itemContent = match.replace(/^-\s/, '').trim();
+                                    const itemContent = match.replace(/^-\s/, '').replace(/<br>$/, '');
                                     ulContent += `<li>${itemContent}</li>`;
                                 });
                                 ulContent += '</ul>';
-                                
-                                // Reemplazar todas las coincidencias con la lista completa
+
                                 ulMatches.forEach(match => {
                                     previewContent = previewContent.replace(match, '');
                                 });
                                 previewContent += ulContent;
                             }
-                    
-                            const olMatches = previewContent.match(/\d+\.\s(.+?)(\n|$)/g);
+
+                            const olMatches = previewContent.match(/\d+\.\s(.+?)(<br>|$)/g);
                             if (olMatches) {
                                 let olContent = '<ol class="list-decimal pl-5 mb-4">';
                                 olMatches.forEach(match => {
-                                    const itemContent = match.replace(/^\d+\.\s/, '').trim();
+                                    const itemContent = match.replace(/^\d+\.\s/, '').replace(/<br>$/, '');
                                     olContent += `<li>${itemContent}</li>`;
                                 });
                                 olContent += '</ol>';
-                                
-                                // Reemplazar todas las coincidencias con la lista completa
+
                                 olMatches.forEach(match => {
                                     previewContent = previewContent.replace(match, '');
                                 });
                                 previewContent += olContent;
                             }
-                    
+
                             editorPreview.innerHTML = previewContent;
                         }
-                    
+                        // Botón de limpiar
+                        clearButton.addEventListener('click', () => {
+                            if (confirm('¿Estás seguro de que quieres limpiar todo el contenido?')) {
+                                editor.value = '';
+                                generatePreview();
+                            }
+                        });
+
+                        // Botón de ayuda
+                        helpBtn.addEventListener('click', () => {
+                            const helpContent = `
+            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                <h3 class="text-lg font-semibold mb-2">Guía de formato</h3>
+                <ul class="space-y-2">
+                    <li><strong># Texto</strong> - Título</li>
+                    <li><strong>## Texto</strong> - Subtítulo</li>
+                    <li><strong>*texto*</strong> - Negrita</li>
+                    <li><strong>_texto_</strong> - Cursiva</li>
+                    <li><strong>&lt;u&gt;texto&lt;/u&gt;</strong> - Subrayado</li>
+                    <li><strong>- </strong> - Lista con viñetas</li>
+                    <li><strong>1. </strong> - Lista numerada</li>
+                    <li><strong>{color}texto{/color}</strong> - Texto coloreado</li>
+                </ul>
+            </div>
+        `;
+
+                            editorPreview.innerHTML = helpContent;
+                            editorPreview.classList.remove('hidden');
+                            previewButton.innerHTML = '<i class="far fa-eye-slash mr-1"></i> Ocultar ayuda';
+                        });
+
+                        // Manejar la tecla Enter para listas
+                        editor.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                const cursorPos = editor.selectionStart;
+                                const currentLine = editor.value.substring(0, cursorPos).split('\n').pop();
+
+                                // Detectar si estamos en una lista
+                                const ulMatch = currentLine.match(/^-\s/);
+                                const olMatch = currentLine.match(/^\d+\.\s/);
+
+                                if (ulMatch || olMatch) {
+                                    e.preventDefault();
+
+                                    // Si la línea está vacía (excepto por el marcador de lista), terminar la lista
+                                    if (currentLine === '- ' || currentLine.match(/^\d+\.\s$/)) {
+                                        const textBefore = editor.value.substring(0, cursorPos - currentLine.length);
+                                        const textAfter = editor.value.substring(cursorPos);
+                                        editor.value = textBefore + '\n' + textAfter;
+                                        editor.selectionStart = editor.selectionEnd = cursorPos - currentLine.length + 1;
+                                    } else {
+                                        // Continuar la lista
+                                        if (ulMatch) {
+                                            insertTextAtCursor('\n- ', '');
+                                        } else if (olMatch) {
+                                            const nextNum = parseInt(olMatch[0]) + 1;
+                                            insertTextAtCursor(`\n${nextNum}. `, '');
+                                        }
+                                    }
+                                } else {
+                                    e.preventDefault();
+                                    insertTextAtCursor('\n', '');
+                                }
+                            }
+                        });
+
                         // Actualizar la vista previa cada 0.5 segundos
                         setInterval(generatePreview, 500);
-                    
+
                         // Mostrar/ocultar la vista previa
                         previewButton.addEventListener('click', () => {
                             const isVisible = !editorPreview.classList.contains('hidden');
-                    
+
                             if (isVisible) {
                                 editorPreview.classList.add('hidden');
                                 previewButton.innerHTML = '<i class="far fa-eye mr-1"></i> Vista previa';
                             } else {
                                 editorPreview.classList.remove('hidden');
+                                generatePreview();
                                 previewButton.innerHTML = '<i class="far fa-eye-slash mr-1"></i> Ocultar vista previa';
                             }
                         });
+
+                        // Inicialización
+                        editorPreview.classList.add('hidden');
+                        generatePreview();
                     });
-                    </script>
-                    <div class="text-center">
-                        <button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-full shadow-lg hover:from-blue-700 hover:to-indigo-700 transition duration-300 pulse-animation">
-                            <i class="fas fa-cloud-upload-alt mr-2"></i>
-                            <span>Subir Material</span>
-                        </button>
-                        <span class="text-sm text-gray-600 mt-2 block">
-                            Al subir documentos a nuestra plataforma, aceptas los 
-                            <a href="{{ url_for('condiciones') }}" class="text-blue-500 hover:text-blue-700 underline">términos y condiciones</a>.
-                        </span>
-                    </div>
+                </script>
+                <div class="text-center">
+                    <button type="submit"
+                        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-full shadow-lg hover:from-blue-700 hover:to-indigo-700 transition duration-300 pulse-animation">
+                        <i class="fas fa-cloud-upload-alt mr-2"></i>
+                        <span>Subir Material</span>
+                    </button>
+                    <span class="text-sm text-gray-600 mt-2 block">
+                        Al subir documentos a nuestra plataforma, aceptas los
+                        <a href="{{ url_for('condiciones') }}"
+                            class="text-blue-500 hover:text-blue-700 underline">términos y condiciones</a>.
+                    </span>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const fileInput = document.getElementById('fileInput');
-    const browseButton = document.getElementById('browseButton');
-    const dropArea = document.getElementById('dropArea');
-    const filePreview = document.getElementById('filePreview');
-    const fileName = document.getElementById('fileName');
-    const fileIcon = document.getElementById('fileIcon');
-    const removeFile = document.getElementById('removeFile');
+    document.addEventListener('DOMContentLoaded', function () {
+        const fileInput = document.getElementById('fileInput');
+        const browseButton = document.getElementById('browseButton');
+        const dropArea = document.getElementById('dropArea');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const fileIcon = document.getElementById('fileIcon');
+        const removeFile = document.getElementById('removeFile');
 
-    // Abrir el selector de archivos al hacer clic en "Buscar en tu dispositivo"
-    browseButton.addEventListener('click', () => fileInput.click());
+        // Abrir el selector de archivos al hacer clic en "Buscar en tu dispositivo"
+        browseButton.addEventListener('click', () => fileInput.click());
 
-    // Manejar la selección de archivos
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            showFilePreview(file);
+        // Manejar la selección de archivos
+        fileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                showFilePreview(file);
+            }
+        });
+
+        // Manejar el arrastrar y soltar
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('border-blue-500');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('border-blue-500');
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('border-blue-500');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                showFilePreview(file);
+            }
+        });
+
+        // Mostrar la vista previa del archivo
+        function showFilePreview(file) {
+            fileName.textContent = file.name;
+            fileIcon.className = getFileIconClass(file);
+            filePreview.classList.remove('hidden');
+        }
+
+        // Eliminar el archivo seleccionado
+        removeFile.addEventListener('click', () => {
+            fileInput.value = '';
+            filePreview.classList.add('hidden');
+        });
+
+        // Obtener el ícono correspondiente al tipo de archivo
+        function getFileIconClass(file) {
+            const fileType = file.type.split('/')[0];
+            switch (fileType) {
+                case 'image':
+                    return 'fas fa-file-image text-blue-500 mr-3 text-xl';
+                case 'application':
+                    return 'fas fa-file-pdf text-red-500 mr-3 text-xl';
+                default:
+                    return 'fas fa-file text-blue-500 mr-3 text-xl';
+            }
         }
     });
-
-    // Manejar el arrastrar y soltar
-    dropArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropArea.classList.add('border-blue-500');
-    });
-
-    dropArea.addEventListener('dragleave', () => {
-        dropArea.classList.remove('border-blue-500');
-    });
-
-    dropArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropArea.classList.remove('border-blue-500');
-        const file = e.dataTransfer.files[0];
-        if (file) {
-            showFilePreview(file);
-        }
-    });
-
-    // Mostrar la vista previa del archivo
-    function showFilePreview(file) {
-        fileName.textContent = file.name;
-        fileIcon.className = getFileIconClass(file);
-        filePreview.classList.remove('hidden');
-    }
-
-    // Eliminar el archivo seleccionado
-    removeFile.addEventListener('click', () => {
-        fileInput.value = '';
-        filePreview.classList.add('hidden');
-    });
-
-    // Obtener el ícono correspondiente al tipo de archivo
-    function getFileIconClass(file) {
-        const fileType = file.type.split('/')[0];
-        switch (fileType) {
-            case 'image':
-                return 'fas fa-file-image text-blue-500 mr-3 text-xl';
-            case 'application':
-                return 'fas fa-file-pdf text-red-500 mr-3 text-xl';
-            default:
-                return 'fas fa-file text-blue-500 mr-3 text-xl';
-        }
-    }
-});
 </script>
 {% endblock %}

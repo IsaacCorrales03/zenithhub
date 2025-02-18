@@ -10,9 +10,12 @@ from googleapiclient.http import MediaIoBaseUpload
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.enums import TA_CENTER
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
+import os
+import re
+
 from dotenv import load_dotenv
 
 # Configuración inicial de Flask
@@ -49,6 +52,8 @@ def get_db_connection():
         print(f"Error al conectar a MySQL: {e}")
         return None
 
+
+
 def text_to_pdf(text, filename):
     filepath = os.path.join('static/uploads', filename)
     pdf = SimpleDocTemplate(
@@ -59,51 +64,151 @@ def text_to_pdf(text, filename):
         topMargin=72,
         bottomMargin=18
     )
+    
     styles = getSampleStyleSheet()
+    
+    # Custom styles with Unicode support
+    custom_title = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Title'],
+        fontSize=24,
+        spaceAfter=30,
+        encoding='utf-8'
+    )
+    
+    custom_heading2 = ParagraphStyle(
+        'CustomHeading2',
+        parent=styles['Normal'],
+        fontSize=18,
+        spaceAfter=20,
+        encoding='utf-8'
+    )
+    
+    custom_normal = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=12,
+        spaceAfter=12,
+        encoding='utf-8'
+    )
+    
+    # Create bullet style
+    bullet_style = ParagraphStyle(
+        'BulletStyle',
+        parent=styles['Normal'],
+        fontSize=12,
+        spaceAfter=12,
+        leftIndent=20,
+        encoding='utf-8'
+    )
+    
     story = []
-
+    
+    # Process text line by line with error handling
     lines = text.split('\n')
-    for line in lines:
-        line = line.strip()
-        if not line:  # Skip empty lines
-            continue
+    i = 0
+    while i < len(lines):
+        try:
+            line = lines[i].strip()
+            if not line:
+                i += 1
+                continue
             
-        if line.startswith("##"):
-            story.append(Paragraph(line[2:].strip(), styles['Title']))
-        elif line.startswith("*"):
-            # Corrección para texto en negrita
-            content = line[1:].strip()
-            story.append(Paragraph(f"<para><b>{content}</b></para>", styles['BodyText']))
-        elif line.startswith("_"):
-            # Corrección para texto en cursiva
-            content = line[1:].strip()
-            story.append(Paragraph(f"<para><i>{content}</i></para>", styles['BodyText']))
-        elif line.startswith("<u>"):
-            # Corrección para texto subrayado
-            content = line[3:-4].strip()  # Removemos <u> y </u>
-            story.append(Paragraph(f"<para><u>{content}</u></para>", styles['BodyText']))
-        elif "{" in line and "}" in line:
-            # Corrección para texto con color
-            try:
-                parts = line.split("}")
-                color = parts[0][1:]  # Removemos el { inicial
-                content = parts[1].split("{")[0]  # Obtenemos el contenido entre las llaves
-                story.append(Paragraph(f"<para><font color='{color}'>{content}</font></para>", styles['BodyText']))
-            except IndexError:
-                # Si hay un error en el formato, lo tratamos como texto normal
-                story.append(Paragraph(line, styles['BodyText']))
-        elif line.startswith("- "):
-            story.append(Paragraph(f"<para>• {line[2:].strip()}</para>", styles['BodyText']))
-        elif line[0].isdigit() and line[1] == '.':
-            story.append(Paragraph(f"<para>{line}</para>", styles['BodyText']))
-        else:
-            story.append(Paragraph(f"<para>{line}</para>", styles['BodyText']))
-        
-        story.append(Spacer(1, 12))
-
-    pdf.build(story)
-    return filepath
-
+            # Process tables
+            if line.startswith('|'):
+                table_data = []
+                table_lines = []
+                
+                while i < len(lines) and lines[i].strip().startswith('|'):
+                    table_lines.append(lines[i].strip())
+                    i += 1
+                
+                headers = [cell.strip() for cell in table_lines[0].split('|')[1:-1]]
+                rows = [[cell.strip() for cell in row.split('|')[1:-1]] 
+                       for row in table_lines[2:]]
+                
+                table_data = [headers] + rows
+                table = Table(table_data)
+                
+                table_style = TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 12),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 1), (-1, -1), 10),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                    ('PADDING', (0, 0), (-1, -1), 6),
+                ])
+                table.setStyle(table_style)
+                story.append(table)
+                story.append(Spacer(1, 12))
+                continue
+            
+            # Process titles and formatting
+            if line.startswith('# '):
+                story.append(Paragraph(line[2:].strip(), custom_title))
+            elif line.startswith('## '):
+                story.append(Paragraph(line[3:].strip(), custom_heading2))
+            elif line.startswith('*') and line.endswith('*'):
+                content = line[1:-1].strip()
+                story.append(Paragraph(f"<para><b>{content}</b></para>", custom_normal))
+            elif line.startswith('_') and line.endswith('_'):
+                content = line[1:-1].strip()
+                story.append(Paragraph(f"<para><i>{content}</i></para>", custom_normal))
+            elif line.startswith('<u>') and line.endswith('</u>'):
+                content = line[3:-4].strip()
+                story.append(Paragraph(f"<para><u>{content}</u></para>", custom_normal))
+            # Handle bullet points differently
+            elif line.startswith('- '):
+                content = line[2:].strip()
+                story.append(Paragraph(
+                    f"• {content}",
+                    bullet_style
+                ))
+            # Handle numbered lists differently
+            elif re.match(r'^\d+\.\s', line):
+                number, content = line.split('. ', 1)
+                story.append(Paragraph(
+                    f"{number}. {content}",
+                    bullet_style
+                ))
+            # Handle colored text
+            elif '{' in line and '}' in line:
+                try:
+                    color_match = re.search(r'\{([^}]+)\}([^{]+)\{/color\}', line)
+                    if color_match:
+                        color = color_match.group(1)
+                        content = color_match.group(2)
+                        story.append(Paragraph(
+                            f"<para><font color='{color}'>{content}</font></para>",
+                            custom_normal
+                        ))
+                except:
+                    story.append(Paragraph(line, custom_normal))
+            else:
+                story.append(Paragraph(line, custom_normal))
+            
+            story.append(Spacer(1, 12))
+            i += 1
+            
+        except Exception as e:
+            print(f"Error processing line {i}: {str(e)}")
+            # Skip problematic line and continue with the next
+            i += 1
+            continue
+    
+    try:
+        pdf.build(story)
+        return filepath
+    except Exception as e:
+        print(f"Error building PDF: {str(e)}")
+        return None
 @app.route('/')
 def index():
     conn = get_db_connection()
